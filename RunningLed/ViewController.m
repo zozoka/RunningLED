@@ -16,10 +16,14 @@
 
 {
     CGFloat _margin;
-    int _numberBall;
     CGFloat _space;
     CGFloat _diameterBall;
     CGFloat _y;
+    int _lastOnLed;
+    int _lastOnLed2;
+    NSTimer* _time;
+    NSTimer* _time2;
+    int _numberOfBall;
 }
 
 - (void)viewDidLoad {
@@ -28,14 +32,66 @@
     //[self checkSizeApp];
     _margin = 40.0;
     _diameterBall = 24.0;
-    [self drawBallsInView:100];
+    _lastOnLed = -1;
+    
+    _numberOfBall = 91; // number ball in view
+    _lastOnLed2 = _numberOfBall;
+    
+    [self drawBallsInView:_numberOfBall];
+    _time = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(runningLED) userInfo:nil repeats:true];
+    _time2 = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(runningLED2) userInfo:nil repeats:true];
+}
+
+-(void) runningLED{
+    if (_lastOnLed != -1) {
+        [self turnOffLED:_lastOnLed];
+    }
+    if (_lastOnLed != _numberOfBall-1) {
+        _lastOnLed ++;
+    }else{
+        _lastOnLed = 0;
+    }
+    //NSLog(@"index %d",_lastOnLed);
+    [self turnOnLED:_lastOnLed];
+}
+
+-(void) runningLED2{
+    if (_lastOnLed2 != -1) {
+        [self turnOffLED:_lastOnLed2];
+    }
+    if (_lastOnLed2 != 0) {
+        _lastOnLed2 --;
+    }else{
+        _lastOnLed2 = _numberOfBall-1;
+    }
+    //NSLog(@"index %d",_lastOnLed);
+    [self turnOnLED:_lastOnLed2];
+}
+
+
+-(void) turnOnLED: (int) index{
+    //NSLog(@"turn on index: %d",index);
+    UIView* view = [self.view viewWithTag:index + 100];
+    if (view && [view isMemberOfClass:[UIImageView class]]) {
+        UIImageView* ball = (UIImageView*) view;
+        ball.image = [UIImage imageNamed:@"green"];
+    }
+}
+
+-(void) turnOffLED: (int) index{
+    //NSLog(@"turn off index: %d", index);
+    UIView* view = [self.view viewWithTag: index + 100];
+    if (view && [view isMemberOfClass:[UIImageView class]]) {
+        UIImageView* ball = (UIImageView*) view;
+        ball.image = [UIImage imageNamed:@"grey"];
+    }
 }
 
 - (void) placeGreenBallWithX: (CGFloat)x
                         andY:(CGFloat)y
                       andTag:(int)tag
 {
-    UIImageView* ball = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"green"]];
+    UIImageView* ball = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"grey"]];
     ball.center = CGPointMake(x, y);
     ball.tag = tag;
     [self.view addSubview:ball];
@@ -55,7 +111,7 @@
             if(temp == numberBall){
                 return;
             }
-            [self placeGreenBallWithX: _margin+j*space andY:100+_y*i andTag:i+j];
+            [self placeGreenBallWithX: _margin+j*space andY:100+_y*i andTag:temp+100];
             temp++;
             NSLog(@"so bong %d",temp);
         }
